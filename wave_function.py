@@ -113,6 +113,35 @@ def calc_2_ends(syst, a = 1, kx=0, ky=0, L = 300):
 
     return (psi_t[0], psi_t[-1])
 
+def plot_color_map(syst, x_N, y_N, a=1, L=300):
+
+    ky_v, kx_v = np.mgrid[-np.pi:np.pi: y_N*1j, -np.pi:np.pi:x_N*1j]
+
+    psi_1 = np.zeros([y_N, x_N])
+    psi_N = np.zeros([y_N, x_N])
+
+    kx_array = np.linspace(-np.pi, np.pi, x_N)
+    ky_array = np.linspace(-np.pi, np.pi, y_N)
+
+    for ni in range(x_N):
+        for nj in range(y_N):
+            p_1, p_N = calc_2_ends(syst, a=a, kx = kx_array[ni], ky = ky_array[nj], L = L)
+            psi_1[nj, ni] = p_1
+            psi_N[nj, ni] = p_N
+
+
+    fig, (ax0, ax1) = pyplot.subplots(nrows=2)
+
+    left_end = ax0.pcolormesh(kx_v, ky_v, psi_1)
+    fig.colorbar(left_end, ax=ax0)
+
+    right_end = ax1.pcolormesh(kx_v, ky_v, psi_N)
+    fig.colorbar(right_end, ax=ax1)
+
+    fig.tight_layout()
+
+    pyplot.show()
+
 def main():
 
     m = 0.9
@@ -132,9 +161,11 @@ def main():
     syst = syst.finalized()
 
     plot_wave_function(syst,L=L)
-    a, b = calc_2_ends(syst, a = 1, kx=0, ky=0, L = 300)
-    print(a)
-    print(b)
+    a, b = calc_2_ends(syst, a = a, kx = 0, ky = 0, L = L)
+
+    x_N = 50 # number of points for 'kx'
+    y_N = 40 # number of points for 'ky'
+    plot_color_map(syst, x_N, y_N, a=a, L=L)
 
     # lead1 = make_lead(m).finalized()
     # kwant.plotter.bands(lead1, show=False)
