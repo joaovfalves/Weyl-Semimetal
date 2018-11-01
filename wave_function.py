@@ -75,6 +75,35 @@ def plot_wave_function(syst, m = 0.9, a = 1, t = 0.5, L = 300):
     pyplot.plot(z, up_sq + dn_sq)
     pyplot.show()
 
+def calc_2_ends(syst, a = 1, kx=0, ky=0, L = 300):
+
+    '''
+    Essa função retorna o valor do módulo da
+    função de onda nos pontos inicial e final
+    da cadeia unidimensional que compõe o
+    sistema. Note que a função retorna uma 'tuple'
+    com duas entradas.
+
+    '''
+
+    # Calculate the wave functions in the system.
+    ham_mat = syst.hamiltonian_submatrix(sparse=True, args=[kx, ky])
+    # ham_mat = syst.hamiltonian_submatrix(sparse=True)
+    evals, evecs = sorted_eigs(sla.eigsh(ham_mat, k=5, which='SM'))
+
+    # Plot the probability density of the 10th eigenmode.
+    evecs_up = evecs[:, 0][0::2]
+    evecs_dn = evecs[:, 0][1::2]
+
+    z = np.array(range(L))
+    up_sq = abs(evecs_up)**2
+    dn_sq = abs(evecs_dn)**2
+    mod_sqrd = up_sq + dn_sq
+    norm = a * sum(up_sq + dn_sq)
+    psi_t = (1/norm) * mod_sqrd
+
+    return (psi_t[0], psi_t[-1])
+
 def main():
 
     m = 0.9
@@ -88,6 +117,9 @@ def main():
     syst = syst.finalized()
 
     plot_wave_function(syst)
+    a, b = calc_2_ends(syst, a = 1, kx=0, ky=0, L = 300)
+    print(a)
+    print(b)
 
     # lead1 = make_lead(m).finalized()
     # kwant.plotter.bands(lead1, show=False)
